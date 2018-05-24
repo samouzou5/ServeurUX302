@@ -1,7 +1,6 @@
 package communciationUDP;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
@@ -11,14 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 /**
  *
  * @author EpulInfo
@@ -30,37 +22,7 @@ public class ClientServer {
     public InetAddress iadd_server;
     public int port;
     public byte[] buffer = new byte[512];
-    public final static int PORT = 8532;
-    List<Integer> listeClients = new ArrayList<>();
-
-    /**
-     * Récupère la liste des ports disponibles entre deb et fin
-     * @param deb //port de début
-     * @param fin //port de fin
-     * @return 
-     */
-    public static List<Integer> scan(int deb, int fin) {
-        List<Integer> listePorts = new ArrayList<>();
-        for (int i = deb; i <= fin; i++) {
-            try {
-                DatagramSocket data = new DatagramSocket(i);
-                data.close();
-                listePorts.add(i);
-            } catch (SocketException ex) {
-                
-            }
-        }
-        return listePorts;
-    }
-    
-    /**
-     * 
-     * @return Retourne le Datagram Socket intialisé sur un port
-     */
-    public DatagramSocket getDatagramSocket(){
-        return ds;
-    }
-    
+    public final static int PORT = 8532;    
     /**
      * Constructeur par défaut, le datagram socket choisira un port lui même
      */
@@ -99,6 +61,34 @@ public class ClientServer {
     }
     
     /**
+     * Récupère la liste des ports disponibles entre deb et fin
+     * @param deb //port de début
+     * @param fin //port de fin
+     * @return 
+     */
+    public static List<Integer> scan(int deb, int fin) {
+        List<Integer> listePorts = new ArrayList<>();
+        for (int i = deb; i <= fin; i++) {
+            try {
+                DatagramSocket data = new DatagramSocket(i);
+                data.close();
+                listePorts.add(i);
+            } catch (SocketException ex) {
+                
+            }
+        }
+        return listePorts;
+    }
+    
+    /**
+     * 
+     * @return Retourne le Datagram Socket intialisé sur un port
+     */
+    public DatagramSocket getDatagramSocket(){
+        return ds;
+    }
+    
+    /**
      * permet d'envoyer un message
      * @param i adresse ip de destination
      * @param port port de destination
@@ -108,6 +98,7 @@ public class ClientServer {
         buffer = new byte[512];
         buffer = message.getBytes();
         dp = new DatagramPacket(buffer,buffer.length,i,port);
+        dp.setAddress(iadd_server);
         try {
             ds.send(dp);
             Arrays.fill(buffer, (byte)0); //vider le tableau
@@ -165,7 +156,11 @@ public class ClientServer {
      * @return permet de récupérer le port utilisé par le client ou le serveur 
      */
     public int getPort() {
-        return dp.getPort();
+        int i = 0;
+        if(dp != null){
+            i = dp.getPort();
+        }
+        return i;
     }
     
     /**
@@ -177,5 +172,15 @@ public class ClientServer {
     public static int catchPortAvailable(int portDeb, int portFin){
         List<Integer> listePortUtil = scan(portDeb, portFin);
         return listePortUtil.get(0);
+    }
+    
+    //port du client
+    public int getClientPort(){
+        return ds.getLocalPort();
+    }
+    
+    //affiche le premier message du client au serveur avant création de la communcation
+    public void showFirstMessage(InetAddress ia,int portSource,String message ){
+        System.out.println("Message du client " + ia + ":" + portSource + ", il dit : " + message);
     }
 }

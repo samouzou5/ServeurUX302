@@ -13,7 +13,6 @@ import communciationUDP.Communication;
  * @author EpulInfo
  */
 public class ServeurConcurrent extends ClientServer {
-    private Communication chat = null;
     /**
      * constructeur du serveur concurrent
      * @param port port d'écoute
@@ -27,32 +26,9 @@ public class ServeurConcurrent extends ClientServer {
      */
     public void lancerServeur(){
         while(true){
-            int choice = 0;
-            do {
-                receivePacket();
-                String message = getMessage().trim();
-                if (message.equals("bonjour serveur echo")) {
-                    choice = 1;
-                } else if (message.equals("bonjour chat")) {
-                    choice = 2;
-                }
-                
-            } while (choice == 0);
+            receivePacket();
             System.out.println("Un client vient de se connecter ici : " + getHostName() + ":" + getPort());
-            
-            switch (choice) {
-                case 1:
-                    new Thread(new Communication(getAddressSender(), getPort())).start();
-                    break;
-                case 2:
-                    if (chat == null) {
-                        chat = new Communication();
-                        new Thread(chat).start();
-                    }
-                    sendMessage(getAddressSender(),chat.port, Integer.toString(getPort()));
-                    break;
-            }
-            
+            new Thread(new Communication(getAddressSender(), getPort(),getMessage())).start();
         }
     }
     
